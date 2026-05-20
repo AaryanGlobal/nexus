@@ -146,7 +146,6 @@ class LifeContextEngine:
     
     def _save(self):
         """Save to storage atomically."""
-        import tempfile
         path = Path(self.storage_path)
         path.parent.mkdir(parents=True, exist_ok=True)
         

@@ -134,7 +134,7 @@ export class HermesHttpClient {
     description: string;
     timeout_seconds?: number;
     priority?: string;
-    context?: Record<string, any>;
+    context?: Record<string, unknown>;
   }): Promise<ApiResponse<{
     kanban_id: string;
     status: string;

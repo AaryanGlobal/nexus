@@ -3,29 +3,29 @@ import pytest
 import json
 from pathlib import Path
 from hermes_pi_bridge_core.evolution import (
-    EvolutionController, TestResult, EvolutionRecord
+    EvolutionController, TestRun, EvolutionRecord
 )
 
-class TestTestResultParsing:
+class TestTestRunParsing:
     """Test test result parsing."""
     
     def test_parse_pytest_summary(self):
         output = "test_file.py ....... 10 passed in 0.5s"
-        result = TestResult._parse_text_output(output, 0.5)
+        result = TestRun._parse_text_output(output, 0.5)
         assert result.passed == 10
         assert result.failed == 0
         assert result.success is True
     
     def test_parse_failed_tests(self):
         output = "1 failed, 5 passed in 1.2s"
-        result = TestResult._parse_text_output(output, 1.2)
+        result = TestRun._parse_text_output(output, 1.2)
         assert result.passed == 5
         assert result.failed == 1
         assert result.success is False
     
     def test_parse_json_output(self):
         json_data = '{"passed": 15, "failed": 2, "skipped": 1, "success": false}'
-        result = TestResult.from_pytest_output(json_data, 2.0)
+        result = TestRun.from_pytest_output(json_data, 2.0)
         assert result.passed == 15
         assert result.failed == 2
         assert result.success is False
@@ -62,8 +62,8 @@ class TestEvolutionController:
             "packages/core/tests/test_types.py",
             python_path="$HOME/.hermes/hermes-agent/venv/bin/python3"
         )
-        # Should return a TestResult object
-        assert isinstance(result, TestResult)
+        # Should return a TestRun object
+        assert isinstance(result, TestRun)
         assert result.total >= 0
     
     def test_run_tests_timeout(self):
@@ -125,7 +125,7 @@ class TestSelfHealing:
     """Test self-healing behavior."""
     
     def test_detect_failure_from_result(self):
-        result = TestResult(
+        result = TestRun(
             passed=10, failed=1, skipped=0, errors=0,
             total=11, duration_seconds=1.0,
             output="Test failed", success=False
@@ -147,7 +147,7 @@ class TestSelfHealing:
         assert failures == ctrl.max_retries
     
     def test_success_resets_circuit(self):
-        result = TestResult(
+        result = TestRun(
             passed=5, failed=0, skipped=0, errors=0,
             total=5, duration_seconds=0.5,
             output="All passed", success=True

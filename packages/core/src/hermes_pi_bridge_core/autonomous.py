@@ -20,15 +20,14 @@ from .security import SecurityControls, SecurityConfig
 from .evolution import EvolutionController
 from .executor import SafeExecutor, ExecutionConfig
 from .scanner import WorkScanner, ScanConfig, DiscoveredTask
-from .goals import GoalManager, GoalStatus, GoalPriority
-from .governance import BridgeGovernance, GovernanceConfig, DecisionType, DecisionConfidence
+from .goals import GoalManager
+from .governance import BridgeGovernance, GovernanceConfig, DecisionType
 from .rl import ReinforcementLearning, RLConfig, ActionType
-from .rate_limiter import RateLimiter, RateLimitConfig
+from .rate_limiter import RateLimiter
 from .life_context import LifeContextEngine
-from .config import NexusConfig, get_config
+from .config import get_config
 from .degradation import GracefulDegradation
-from .bridge import AgentBridge, AgentType, get_bridge
-from pathlib import Path
+from .bridge import get_bridge
 
 
 logger = logging.getLogger(__name__)

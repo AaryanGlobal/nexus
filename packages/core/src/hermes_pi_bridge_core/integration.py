@@ -11,16 +11,13 @@ TDD Tests verify:
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from dataclasses import dataclass
+from typing import Any, Callable
 import time
 
-from .loop import NHILLoop, LoopConfig, LoopState
+from .loop import NHILLoop, LoopConfig
 from .learning import PatternLearner, CapabilityAssessment
 from .persistence import PersistenceManager, PersistedState, CrashRecovery
-from .reasoner import TaskReasoner, DelegationDecision
-from .security import SecurityControls
-from .evolution import EvolutionController
 
 
 logger = logging.getLogger(__name__)

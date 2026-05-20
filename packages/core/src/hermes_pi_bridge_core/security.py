@@ -6,8 +6,6 @@ Implements defense-in-depth security for autonomous agentic systems.
 
 from __future__ import annotations
 
-import hashlib
-import hmac
 import re
 import time
 from dataclasses import dataclass, field

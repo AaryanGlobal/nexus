@@ -11,7 +11,10 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "prepublish": "npm run build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "typebox": "^1.1.0",
+    "@earendil-works/pi-coding-agent": "^0.75.4"
+  },
   "devDependencies": {
     "typescript": "^5.0.0",
     "vitest": "^2.0.0",

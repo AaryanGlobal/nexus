@@ -15,15 +15,14 @@ from __future__ import annotations
 
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, Callable
 import threading
 
-from .reasoner import TaskReasoner, TaskAnalysis, DelegationDecision
-from .security import SecurityControls, ThreatLevel, SecurityViolation
-from .evolution import EvolutionController, TestResult
-from .types import TaskStatus, Priority, ErrorCode
+from .reasoner import TaskReasoner, DelegationDecision
+from .security import SecurityControls
+from .evolution import EvolutionController
 
 
 logger = logging.getLogger(__name__)

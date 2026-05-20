@@ -19,7 +19,7 @@ from typing import Any
 
 
 @dataclass
-class TestResult:
+class TestRun:
     """Result of a test execution."""
     passed: int
     failed: int
@@ -31,7 +31,7 @@ class TestResult:
     success: bool
     
     @classmethod
-    def from_pytest_output(cls, output: str, duration: float) -> 'TestResult':
+    def from_pytest_output(cls, output: str, duration: float) -> 'TestRun':
         """Parse pytest JSON output if available, otherwise parse text."""
         try:
             data = json.loads(output)
@@ -49,7 +49,7 @@ class TestResult:
             return cls._parse_text_output(output, duration)
     
     @classmethod
-    def _parse_text_output(cls, output: str, duration: float) -> 'TestResult':
+    def _parse_text_output(cls, output: str, duration: float) -> 'TestRun':
         """Parse pytest text output."""
         passed = failed = skipped = errors = 0
         
@@ -75,7 +75,7 @@ class EvolutionRecord:
     timestamp: float
     trigger: str  # What caused the evolution attempt
     action: str    # What was attempted
-    test_results: TestResult | None
+    test_results: TestRun | None
     success: bool
     artifacts: dict[str, Any] = field(default_factory=dict)
 
@@ -105,7 +105,7 @@ class EvolutionController:
         python_path: str = "python3",
         pytest_args: str = "-v --tb=short",
         timeout: int = 120
-    ) -> TestResult:
+    ) -> TestRun:
         """Run tests and return results."""
         start_time = time.time()
         
@@ -120,17 +120,17 @@ class EvolutionController:
             output = result.stdout + "\n" + result.stderr
             duration = time.time() - start_time
             
-            return TestResult.from_pytest_output(output, duration)
+            return TestRun.from_pytest_output(output, duration)
             
         except subprocess.TimeoutExpired:
-            return TestResult(
+            return TestRun(
                 passed=0, failed=0, skipped=0, errors=1,
                 total=0, duration_seconds=timeout,
                 output="Test execution timed out",
                 success=False
             )
         except Exception as e:
-            return TestResult(
+            return TestRun(
                 passed=0, failed=0, skipped=0, errors=1,
                 total=0, duration_seconds=time.time() - start_time,
                 output=str(e),
@@ -142,7 +142,7 @@ class EvolutionController:
         test_path: str,
         npm_path: str = "npm",
         timeout: int = 120
-    ) -> TestResult:
+    ) -> TestRun:
         """Run TypeScript tests."""
         start_time = time.time()
         
@@ -157,17 +157,17 @@ class EvolutionController:
             output = result.stdout + "\n" + result.stderr
             duration = time.time() - start_time
             
-            return TestResult.from_pytest_output(output, duration)
+            return TestRun.from_pytest_output(output, duration)
             
         except subprocess.TimeoutExpired:
-            return TestResult(
+            return TestRun(
                 passed=0, failed=0, skipped=0, errors=1,
                 total=0, duration_seconds=timeout,
                 output="Test execution timed out",
                 success=False
             )
         except Exception as e:
-            return TestResult(
+            return TestRun(
                 passed=0, failed=0, skipped=0, errors=1,
                 total=0, duration_seconds=time.time() - start_time,
                 output=str(e),

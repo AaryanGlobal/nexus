@@ -3,6 +3,13 @@ Hermes Bridge HTTP Server.
 
 This server runs alongside Hermes and receives task results from pi.
 It updates the Hermes Kanban and notifies the agent of completed tasks.
+
+Callback Chain (Key Feature):
+1. pi POSTs result to /api/v1/task.result
+2. Server calls emit_task_completed()
+3. emit_task_completed triggers CallbackRegistry
+4. Registered callbacks fire (push notification)
+5. User gets notified without polling!
 """
 
 from __future__ import annotations
@@ -16,6 +23,23 @@ from typing import Any
 from fastapi import FastAPI, Header, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+
+# Import callback system for notification chain
+# Note: Some imports are for availability checking, not direct use
+try:
+    from hermes_pi_bridge_core.callback import (
+        CallbackEvent,
+        get_callback_registry,
+    )
+    from hermes_pi_bridge_core.notification import (
+        NotificationPayload,
+    )
+    CALLBACK_SYSTEM_AVAILABLE = True
+except ImportError:
+    CALLBACK_SYSTEM_AVAILABLE = False
+    CallbackEvent = None
+    get_callback_registry = None
+    NotificationPayload = None
 
 logger = logging.getLogger(__name__)
 
@@ -607,15 +631,47 @@ def _calculate_progress(task: TrackedTask) -> int:
 async def emit_task_completed(task: TrackedTask) -> None:
     """
     Emit event when task completes.
-
-    This should trigger Hermes to pick up the result.
+    
+    This is the KEY notification chain entry point:
+    1. Task result received from pi
+    2. Triggers CallbackRegistry.emit()
+    3. Registered callbacks fire (no polling!)
+    4. Webhooks dispatched if configured
+    
+    Args:
+        task: The completed task
     """
     logger.info(
         f"Task completed: {task.task_id} -> {task.status.value} "
         f"(summary: {task.result.get('summary', '')[:50] if task.result else ''})"
     )
-    # The Hermes agent should be notified via hooks/callbacks
-    # For now, just log
+    
+    # Build result data
+    result_data = {
+        "task_id": task.task_id,
+        "kanban_id": task.kanban_id,
+        "status": task.status.value,
+        "success": task.status in (TaskStatus.SUCCESS, TaskStatus.PARTIAL),
+        "summary": task.result.get("summary", "") if task.result else "",
+        "artifacts": task.result.get("artifacts", []) if task.result else [],
+        "errors": task.result.get("errors", []) if task.result else [],
+        "pi_task_id": task.pi_task_id,
+    }
+    
+    # === CALLBACK CHAIN: PUSH NOTIFICATION ===
+    if CALLBACK_SYSTEM_AVAILABLE:
+        registry = get_callback_registry()
+        
+        # Emit RESULT_RECEIVED event (triggers all registered callbacks)
+        registry.emit(CallbackEvent.RESULT_RECEIVED, result_data)
+        
+        # Also emit completion event
+        if task.status in (TaskStatus.SUCCESS, TaskStatus.PARTIAL):
+            registry.emit(CallbackEvent.TASK_COMPLETED, result_data)
+        else:
+            registry.emit(CallbackEvent.TASK_FAILED, result_data)
+        
+        logger.info(f"Callback chain triggered for task {task.task_id}")
 
 
 # =============================================================================

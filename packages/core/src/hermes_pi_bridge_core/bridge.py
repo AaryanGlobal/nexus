@@ -6,11 +6,20 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional, Literal
 from enum import Enum
-from pathlib import Path
 import json
 import logging
 import urllib.request
 import urllib.error
+
+# Import callback system
+from .callback import (
+    CallbackEvent,
+    get_callback_registry,
+)
+from .notification import (
+    BridgeResultHandler,
+    get_webhook_dispatcher,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +102,19 @@ class AgentBridge:
         
         # Callbacks for incoming messages
         self._handlers: dict[str, callable] = {}
+        
+        # Result handling - wire in callback system
+        self._result_callbacks: list[callable] = []
+        self._callback_handler = get_callback_registry()
+        self._webhook_dispatcher = get_webhook_dispatcher()
+        self._result_handler = None  # Lazy initialization
+    
+    @property
+    def result_handler(self) -> BridgeResultHandler:
+        """Lazy initialization of result handler."""
+        if self._result_handler is None:
+            self._result_handler = BridgeResultHandler()
+        return self._result_handler
     
     def connect(self, agent: AgentType, url: str | None = None,
                 auth_token: str | None = None, quick: bool = False) -> bool:
@@ -166,8 +188,6 @@ class AgentBridge:
             # Use agent-specific endpoints with JSON-RPC protocol for PI
             if to_agent == AgentType.PI:
                 # PI uses JSON-RPC 2.0 API
-                import json
-                import uuid
                 rpc_payload = {
                     "jsonrpc": "2.0",
                     "id": 1,
@@ -181,15 +201,15 @@ class AgentBridge:
                         "timeout_seconds": message.content.get("timeout", 300)
                     }
                 }
-                response = self._http_post_jsonrpc(conn.url + "/api/v1/task.delegate", rpc_payload, auth=conn.auth_token)
+                _ = self._http_post_jsonrpc(conn.url + "/api/v1/task.delegate", rpc_payload, auth=conn.auth_token)
             elif to_agent == AgentType.HERMES:
                 # Hermes is webhook platform - try /webhook or use generic endpoint
                 endpoint = "/webhook"
-                response = self._http_post(conn.url + endpoint, payload, auth=conn.auth_token)
+                _ = self._http_post(conn.url + endpoint, payload, auth=conn.auth_token)
             else:
                 # Generic message endpoint
                 endpoint = "/message"
-                response = self._http_post(conn.url + endpoint, payload, auth=conn.auth_token)
+                _ = self._http_post(conn.url + endpoint, payload, auth=conn.auth_token)
             
             # Store in history
             self._add_to_history(message)
@@ -241,7 +261,14 @@ class AgentBridge:
         return message_id
     
     def receive_result(self, from_agent: AgentType, result: dict) -> dict:
-        """Receive a result from an agent."""
+        """Receive a result from an agent.
+        
+        This is the KEY method for the callback chain:
+        1. Receives result from Pi
+        2. Triggers registered callbacks (PUSH, not polling!)
+        3. Dispatches webhook notifications
+        4. Adds to message history
+        """
         message = AgentMessage(
             id=f"msg_{len(self.message_history)}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
             from_agent=from_agent.value,
@@ -251,7 +278,27 @@ class AgentBridge:
         )
         self._add_to_history(message)
         
-        # Handle via callback if registered
+        # === CALLBACK CHAIN: PUSH RESULTS TO SUBSCRIBERS ===
+        # This is the key fix - results are pushed, not polled
+        
+        # 1. Trigger internal callback registry (sync callbacks)
+        self._callback_handler.emit(CallbackEvent.RESULT_RECEIVED, result)
+        
+        # 2. Fire registered result callbacks (user's custom callbacks)
+        for callback in self._result_callbacks:
+            try:
+                callback(result)
+            except Exception as e:
+                logger.error(f"Result callback error: {e}")
+        
+        # 3. Dispatch webhook notifications if configured
+        if self._webhook_dispatcher.channels:
+            try:
+                self._webhook_dispatcher.dispatch_result(result)
+            except Exception as e:
+                logger.error(f"Webhook dispatch error: {e}")
+        
+        # 4. Handle via old-style handler if registered (backward compat)
         handler = self._handlers.get(MessageType.TASK_RESULT.value)
         if handler:
             try:
@@ -260,6 +307,47 @@ class AgentBridge:
                 logger.error(f"Handler error: {e}")
         
         return result
+    
+    def register_result_callback(self, callback: callable) -> None:
+        """
+        Register a callback to be invoked when results arrive.
+        
+        This enables PUSH-based iteration:
+        - Pi finishes → You get notified via callback
+        - No polling required!
+        
+        Args:
+            callback: Function that receives (result: dict)
+        """
+        if callback not in self._result_callbacks:
+            self._result_callbacks.append(callback)
+            callback_name = getattr(callback, '__name__', str(callback))
+            logger.info(f"Registered result callback: {callback_name}")
+    
+    def unregister_result_callback(self, callback: callable) -> bool:
+        """Unregister a result callback."""
+        if callback in self._result_callbacks:
+            self._result_callbacks.remove(callback)
+            return True
+        return False
+    
+    def add_webhook_endpoint(self, endpoint: str) -> None:
+        """Add webhook endpoint for result notifications."""
+        self._webhook_dispatcher.add_channel(endpoint)
+        logger.info(f"Added webhook endpoint: {endpoint}")
+    
+    def remove_webhook_endpoint(self, endpoint: str) -> bool:
+        """Remove webhook endpoint."""
+        return self._webhook_dispatcher.remove_channel(endpoint)
+    
+    def get_notification_stats(self) -> dict:
+        """Get notification/callback statistics."""
+        return {
+            "registered_callbacks": len(self._result_callbacks),
+            "webhook_endpoints": len(self._webhook_dispatcher.channels),
+            "webhook_stats": self._webhook_dispatcher.get_stats(),
+            "callback_history": self._callback_handler.get_history(limit=10),
+        }
     
     def query_capabilities(self, agent: AgentType) -> list[str] | None:
         """Query what capabilities an agent has."""
@@ -432,7 +520,7 @@ class AgentBridge:
                 start = datetime.now()
                 if agent == AgentType.PI:
                     # PI (hermes-agent gateway) uses simple /health endpoint
-                    response = self._http_get(conn.url + "/health")
+                    _ = self._http_get(conn.url + "/health")
                     latency = (datetime.now() - start).total_seconds() * 1000
                     conn.status = "connected"
                     conn.last_contact = datetime.now()
@@ -442,7 +530,7 @@ class AgentBridge:
                         "last_contact": conn.last_contact.isoformat()
                     }
                 else:
-                    response = self._http_get(conn.url + "/health")
+                    _ = self._http_get(conn.url + "/health")
                     latency = (datetime.now() - start).total_seconds() * 1000
                     conn.status = "connected"
                     conn.last_contact = datetime.now()

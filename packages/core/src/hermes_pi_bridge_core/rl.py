@@ -4,7 +4,6 @@ Lightweight RL mechanism for the autonomous agent
 """
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 import time
 import json
 
@@ -250,8 +249,6 @@ class ReinforcementLearning:
     
     def get_statistics(self) -> dict:
         """Get RL statistics."""
-        total_actions = sum(self.actions_taken.values())
-        
         return {
             "total_rewards": self.total_rewards,
             "total_punishments": self.total_punishments,
@@ -288,7 +285,6 @@ class ReinforcementLearning:
     
     def save(self, path: str) -> bool:
         """Save Q-table and state to file."""
-        import json
         from pathlib import Path
         
         data = {
@@ -325,7 +321,6 @@ class ReinforcementLearning:
     
     def load(self, path: str) -> bool:
         """Load Q-table and state from file."""
-        import json
         
         try:
             with open(path) as f:

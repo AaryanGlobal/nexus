@@ -11,16 +11,14 @@ Features:
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Optional, Callable, Awaitable
+from typing import Optional, Callable
 import json
 import asyncio
 import logging
 import threading
-import time
 import hashlib
 import hmac
 from queue import Queue, Empty
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -294,7 +292,7 @@ class WebSocketServer:
     def _check_stale_clients(self, timeout: int = 60) -> list[str]:
         """Check for clients with stale heartbeats."""
         stale = []
-        cutoff = datetime.now() - timedelta(seconds=timeout)
+        _ = datetime.now() - timedelta(seconds=timeout)
         
         for client_id, ws in list(self.clients.items()):
             try:

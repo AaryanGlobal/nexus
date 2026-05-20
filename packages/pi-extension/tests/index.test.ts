@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import HermesBridge, { BridgeConfig } from '../src/index';
+import { HermesBridge } from '../src/index';
 
 // Use vi.hoisted to define mocks that can be referenced in vi.mock
 const { mockDelegateTask, mockReportResult, mockReportReady, mockHeartbeat, mockGetStatus, mockHermesHttpClient } = vi.hoisted(() => ({
@@ -29,9 +29,8 @@ vi.mock('../src/transport/client', () => ({
 
 describe('HermesBridge', () => {
   let bridge: HermesBridge;
-  const config: BridgeConfig = {
+  const config = {
     hermesUrl: 'http://localhost:8080',
-    piPort: 2719,
     authToken: 'test-token',
   };
 
@@ -53,7 +52,25 @@ describe('HermesBridge', () => {
     });
 
     it('should create client instance', () => {
-      expect((bridge as any).client).toBeDefined();
+      expect((bridge as any).httpClient).toBeDefined();
+    });
+  });
+
+  describe('createDelegateTool()', () => {
+    it('should create delegate tool', () => {
+      const tool = bridge.createDelegateTool();
+      expect(tool.name).toBe('hermes_delegate');
+      expect(tool.label).toBe('Delegate to Hermes');
+      expect(tool.description).toContain('Delegate');
+    });
+  });
+
+  describe('createResultTool()', () => {
+    it('should create result tool', () => {
+      const tool = bridge.createResultTool();
+      expect(tool.name).toBe('hermes_report_result');
+      expect(tool.label).toBe('Report Result to Hermes');
+      expect(tool.description).toContain('Report');
     });
   });
 
@@ -105,11 +122,9 @@ describe('HermesBridge', () => {
       });
 
       it('should call delegateTask with formatted params', async () => {
-        await delegateTool.execute(
+        const result = await delegateTool.execute(
           'call-1',
-          { task: 'Analyze this code' },
-          vi.fn(),
-          vi.fn()
+          { title: 'Analyze this code', description: 'Analyze this code' }
         );
 
         expect(mockDelegateTask).toHaveBeenCalledTimes(1);
@@ -124,9 +139,7 @@ describe('HermesBridge', () => {
         const longTask = 'A'.repeat(100);
         await delegateTool.execute(
           'call-2',
-          { task: longTask },
-          vi.fn(),
-          vi.fn()
+          { title: longTask, description: longTask }
         );
 
         const call = mockDelegateTask.mock.calls[0][0];
@@ -137,9 +150,7 @@ describe('HermesBridge', () => {
       it('should pass priority if provided', async () => {
         await delegateTool.execute(
           'call-3',
-          { task: 'Urgent task', priority: 'high' },
-          vi.fn(),
-          vi.fn()
+          { title: 'Urgent task', description: 'Urgent task', priority: 'high' }
         );
 
         const call = mockDelegateTask.mock.calls[0][0];
@@ -154,12 +165,10 @@ describe('HermesBridge', () => {
 
         const result = await delegateTool.execute(
           'call-4',
-          { task: 'Test task' },
-          vi.fn(),
-          vi.fn()
+          { title: 'Test task', description: 'Test task' }
         );
 
-        const parsed = JSON.parse(result);
+        const parsed = JSON.parse(result.content[0].text);
         expect(parsed.success).toBe(true);
         expect(parsed.kanban_id).toBe('hermes-kanban-abc');
       });
@@ -172,14 +181,12 @@ describe('HermesBridge', () => {
 
         const result = await delegateTool.execute(
           'call-5',
-          { task: 'Test task' },
-          vi.fn(),
-          vi.fn()
+          { title: 'Test task', description: 'Test task' }
         );
 
-        const parsed = JSON.parse(result);
+        const parsed = JSON.parse(result.content[0].text);
         expect(parsed.success).toBe(false);
-        expect(parsed.error.message).toBe('Hermes unavailable');
+        expect(parsed.error.message).toBe('Delegation failed: Hermes unavailable');
       });
 
       it('should handle exception', async () => {
@@ -187,12 +194,10 @@ describe('HermesBridge', () => {
 
         const result = await delegateTool.execute(
           'call-6',
-          { task: 'Test task' },
-          vi.fn(),
-          vi.fn()
+          { title: 'Test task', description: 'Test task' }
         );
 
-        const parsed = JSON.parse(result);
+        const parsed = JSON.parse(result.content[0].text);
         expect(parsed.success).toBe(false);
         expect(parsed.error.message).toBe('Network error');
       });
@@ -220,9 +225,7 @@ describe('HermesBridge', () => {
             summary: 'Task completed',
             artifacts: ['/path/to/output.txt'],
             errors: []
-          },
-          vi.fn(),
-          vi.fn()
+          }
         );
 
         expect(mockReportResult).toHaveBeenCalledWith({
@@ -246,12 +249,10 @@ describe('HermesBridge', () => {
             kanban_id: 'task-456',
             status: 'failed',
             summary: 'Task failed'
-          },
-          vi.fn(),
-          vi.fn()
+          }
         );
 
-        const parsed = JSON.parse(result);
+        const parsed = JSON.parse(result.content[0].text);
         expect(parsed.success).toBe(false);
       });
 
@@ -264,17 +265,15 @@ describe('HermesBridge', () => {
             kanban_id: 'task-789',
             status: 'partial',
             summary: 'Partial result'
-          },
-          vi.fn(),
-          vi.fn()
+          }
         );
 
-        const parsed = JSON.parse(result);
+        const parsed = JSON.parse(result.content[0].text);
         expect(parsed.success).toBe(false);
         expect(parsed.error.message).toBe('Connection refused');
       });
 
-      it('should require kanban_id', () => {
+      it('should have required parameters', () => {
         expect(resultTool.parameters.required).toContain('kanban_id');
         expect(resultTool.parameters.required).toContain('status');
         expect(resultTool.parameters.required).toContain('summary');
@@ -283,27 +282,18 @@ describe('HermesBridge', () => {
   });
 
   describe('reportReady()', () => {
-    let mockContext: any;
-
     beforeEach(() => {
-      mockContext = { registerTool: vi.fn() };
       mockReportReady.mockReset();
       mockReportReady.mockResolvedValue({ success: true });
     });
 
     it('should report ready when bridge connects', async () => {
-      bridge.register(mockContext);
       await bridge.reportReady();
-      
-      // reportReady calls client.reportReady - it may or may not use sessionId/taskId
-      // depending on whether config has them
       expect(mockReportReady).toHaveBeenCalled();
     });
 
     it('should handle ready report errors gracefully', async () => {
       mockReportReady.mockRejectedValue(new Error('Connection refused'));
-      
-      bridge.register(mockContext);
       // Should not throw - reportReady catches errors
       await expect(bridge.reportReady()).resolves.not.toThrow();
     });

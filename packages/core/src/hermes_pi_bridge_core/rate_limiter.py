@@ -2,8 +2,7 @@
 Smart Rate Limiter - Prevents API rate limits
 Tracks requests and paces them to avoid provider blocks
 """
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from dataclasses import dataclass
 from typing import Optional
 from collections import deque
 import time
@@ -116,7 +115,7 @@ class RateLimiter:
         """Record a request (successful or not)."""
         now = time.time()
         
-        record = RequestRecord(
+        _ = RequestRecord(
             timestamp=now,
             provider=provider,
             endpoint=endpoint,

@@ -10,8 +10,8 @@ Features:
 - Health checks with auto-reconnect
 - Circuit breaker at bridge level
 """
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional, Callable
 from enum import Enum
 import json

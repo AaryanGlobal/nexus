@@ -2,14 +2,13 @@
  * NHIL Self-Correction Loop Tests - Integration Style
  */
 
-import { describe, it, expect } from 'vitest';
-import HermesBridge, { BridgeConfig } from '../src/index';
+import { describe, it, expect, vi } from 'vitest';
+import { HermesBridge } from '../src/index';
 import { HermesHttpClient } from '../src/transport/client';
 
 describe('NHIL: Self-Correction Loop', () => {
-  const config: BridgeConfig = {
-    hermesUrl: 'http://localhost:9999', // Test server
-    piPort: 2719,
+  const config = {
+    hermesUrl: 'http://localhost:9999',
     authToken: 'test-token',
   };
 
@@ -28,12 +27,24 @@ describe('NHIL: Self-Correction Loop', () => {
     it('should create bridge with config', () => {
       const bridge = new HermesBridge(config);
       expect((bridge as any).config).toEqual(config);
-      expect((bridge as any).client).toBeDefined();
+      expect((bridge as any).httpClient).toBeDefined();
     });
 
     it('should reportReady without throwing', async () => {
       const bridge = new HermesBridge(config);
       await expect(bridge.reportReady()).resolves.not.toThrow();
+    });
+
+    it('should create delegate tool', () => {
+      const bridge = new HermesBridge(config);
+      const tool = bridge.createDelegateTool();
+      expect(tool.name).toBe('hermes_delegate');
+    });
+
+    it('should create result tool', () => {
+      const bridge = new HermesBridge(config);
+      const tool = bridge.createResultTool();
+      expect(tool.name).toBe('hermes_report_result');
     });
   });
 

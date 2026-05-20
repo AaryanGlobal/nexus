@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import Callable, Any, Optional
 from enum import Enum
 import logging
-import time
 
 logger = logging.getLogger(__name__)
 

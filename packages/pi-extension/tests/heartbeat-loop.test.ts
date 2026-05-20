@@ -6,14 +6,13 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import HermesBridge, { BridgeConfig } from '../src/index';
+import { HermesBridge } from '../src/index';
 import { HermesHttpClient } from '../src/transport/client';
 
 describe('NHIL: Periodic Heartbeat Loop', () => {
   let client: HermesHttpClient;
-  const config: BridgeConfig = {
+  const config = {
     hermesUrl: 'http://localhost:9999',
-    piPort: 2719,
     authToken: 'test',
   };
 
@@ -79,9 +78,8 @@ describe('NHIL: Periodic Heartbeat Loop', () => {
 });
 
 describe('NHIL: Task Timeout Handler', () => {
-  const config: BridgeConfig = {
+  const config = {
     hermesUrl: 'http://localhost:9999',
-    piPort: 2719,
     authToken: 'test',
   };
 
