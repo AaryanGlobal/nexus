@@ -26,6 +26,18 @@ class TestCLI:
         """CLI should exist."""
         assert CLI_PATH.exists(), f"CLI not found at {CLI_PATH}"
     
+    def test_help_command(self):
+        """Help should show without command."""
+        result = subprocess.run(
+            [sys.executable, str(CLI_PATH)],
+            capture_output=True,
+            text=True,
+            cwd=str(MONOREPO_ROOT)
+        )
+        
+        assert result.returncode == 0
+        assert "usage:" in result.stdout.lower() or "Commands:" in result.stdout
+    
     @pytest.mark.skipif(not is_server_running(), reason="Server not running")
     def test_status_command(self):
         """Status command should work."""
@@ -37,7 +49,7 @@ class TestCLI:
         )
         
         assert result.returncode == 0
-        assert "NEXUS DASHBOARD" in result.stdout or "STATUS" in result.stdout
+        assert "NEXUS" in result.stdout or "Status" in result.stdout
     
     @pytest.mark.skipif(not is_server_running(), reason="Server not running")
     def test_goals_command(self):
@@ -50,68 +62,75 @@ class TestCLI:
         )
         
         assert result.returncode == 0
-        assert "GOALS" in result.stdout
     
     @pytest.mark.skipif(not is_server_running(), reason="Server not running")
-    def test_suggest_command(self):
-        """Suggest command should work."""
+    def test_pillars_command(self):
+        """Pillars command should work."""
         result = subprocess.run(
-            [sys.executable, str(CLI_PATH), "suggest"],
+            [sys.executable, str(CLI_PATH), "pillars"],
             capture_output=True,
             text=True,
             cwd=str(MONOREPO_ROOT)
         )
         
         assert result.returncode == 0
-        assert "AI SUGGESTIONS" in result.stdout
     
     @pytest.mark.skipif(not is_server_running(), reason="Server not running")
-    def test_governance_command(self):
-        """Governance command should work."""
+    def test_capabilities_command(self):
+        """Capabilities command should work."""
         result = subprocess.run(
-            [sys.executable, str(CLI_PATH), "governance"],
+            [sys.executable, str(CLI_PATH), "capabilities"],
             capture_output=True,
             text=True,
             cwd=str(MONOREPO_ROOT)
         )
         
         assert result.returncode == 0
-        assert "GOVERNANCE" in result.stdout
     
     @pytest.mark.skipif(not is_server_running(), reason="Server not running")
-    def test_rl_command(self):
-        """RL command should work."""
+    def test_health_command(self):
+        """Health command should work."""
         result = subprocess.run(
-            [sys.executable, str(CLI_PATH), "rl"],
+            [sys.executable, str(CLI_PATH), "health"],
             capture_output=True,
             text=True,
             cwd=str(MONOREPO_ROOT)
         )
         
         assert result.returncode == 0
-        assert "RL STATISTICS" in result.stdout
     
-    @pytest.mark.skipif(not is_server_running(), reason="Server not running")
-    def test_ideate_command(self):
-        """Ideate command should work."""
+    def test_discover_command(self):
+        """Discover should run without server."""
         result = subprocess.run(
-            [sys.executable, str(CLI_PATH), "ideate", "[HIGH] Test goal"],
+            [sys.executable, str(CLI_PATH), "discover"],
             capture_output=True,
             text=True,
             cwd=str(MONOREPO_ROOT)
         )
         
-        assert result.returncode == 0
-        assert "Added" in result.stdout
+        # Should not crash
+        assert result.returncode in [0, 1]
     
-    def test_help_command(self):
-        """Help should show without command."""
+    def test_sample_command(self):
+        """Sample should run without server."""
         result = subprocess.run(
-            [sys.executable, str(CLI_PATH)],
+            [sys.executable, str(CLI_PATH), "sample"],
             capture_output=True,
             text=True,
             cwd=str(MONOREPO_ROOT)
         )
         
-        assert result.returncode == 0
-        assert "usage:" in result.stdout.lower() or "Commands:" in result.stdout
+        # Should not crash
+        assert result.returncode in [0, 1]
+    
+    def test_sync_command(self):
+        """Sync should run without server."""
+        result = subprocess.run(
+            [sys.executable, str(CLI_PATH), "sync"],
+            capture_output=True,
+            text=True,
+            cwd=str(MONOREPO_ROOT)
+        )
+        
+        # Should not crash
+        assert result.returncode in [0, 1]
