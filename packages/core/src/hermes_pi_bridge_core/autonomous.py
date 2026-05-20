@@ -756,6 +756,7 @@ class AutonomousNHIL:
         self._audit_log.append(AuditEntry(time.time(), 'evolution', f"Attempting fix for: {task[:30]}", 'system'))
         result = self.evolution.attempt_fix(task_description=task, error=error)
         self.tasks_failed = 0
+        logger.info(f"Evolution fix result: {result}")
     
     def _save_state(self) -> bool:
         """Save agent state."""

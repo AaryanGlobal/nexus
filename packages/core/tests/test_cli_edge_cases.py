@@ -6,9 +6,10 @@ import tempfile
 import json
 from pathlib import Path
 
-# Absolute path to CLI
-CLI_PATH = "/home/agi/nexus/nexus"
-PYTHON = "/home/agi/.hermes/hermes-agent/venv/bin/python3"
+# Dynamic path to CLI
+MONOREPO_ROOT = Path(__file__).parent.parent.parent.parent
+CLI_PATH = str(MONOREPO_ROOT / "nexus")
+PYTHON = sys.executable
 
 
 def run_cli(args, env=None):

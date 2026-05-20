@@ -4,9 +4,19 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Get the root of the monorepo (parent of packages/core/tests is packages/core, parent is packages, parent is root)
+# Get the root of the monorepo
 MONOREPO_ROOT = Path(__file__).parent.parent.parent.parent
 CLI_PATH = MONOREPO_ROOT / "nexus"
+
+
+def is_server_running():
+    """Check if Nexus server is running."""
+    try:
+        import urllib.request
+        urllib.request.urlopen('http://localhost:8080/health', timeout=1)
+        return True
+    except Exception:
+        return False
 
 
 class TestCLI:
@@ -16,6 +26,7 @@ class TestCLI:
         """CLI should exist."""
         assert CLI_PATH.exists(), f"CLI not found at {CLI_PATH}"
     
+    @pytest.mark.skipif(not is_server_running(), reason="Server not running")
     def test_status_command(self):
         """Status command should work."""
         result = subprocess.run(
@@ -28,6 +39,7 @@ class TestCLI:
         assert result.returncode == 0
         assert "NEXUS DASHBOARD" in result.stdout or "STATUS" in result.stdout
     
+    @pytest.mark.skipif(not is_server_running(), reason="Server not running")
     def test_goals_command(self):
         """Goals command should work."""
         result = subprocess.run(
@@ -40,6 +52,7 @@ class TestCLI:
         assert result.returncode == 0
         assert "GOALS" in result.stdout
     
+    @pytest.mark.skipif(not is_server_running(), reason="Server not running")
     def test_suggest_command(self):
         """Suggest command should work."""
         result = subprocess.run(
@@ -52,6 +65,7 @@ class TestCLI:
         assert result.returncode == 0
         assert "AI SUGGESTIONS" in result.stdout
     
+    @pytest.mark.skipif(not is_server_running(), reason="Server not running")
     def test_governance_command(self):
         """Governance command should work."""
         result = subprocess.run(
@@ -64,6 +78,7 @@ class TestCLI:
         assert result.returncode == 0
         assert "GOVERNANCE" in result.stdout
     
+    @pytest.mark.skipif(not is_server_running(), reason="Server not running")
     def test_rl_command(self):
         """RL command should work."""
         result = subprocess.run(
@@ -76,6 +91,7 @@ class TestCLI:
         assert result.returncode == 0
         assert "RL STATISTICS" in result.stdout
     
+    @pytest.mark.skipif(not is_server_running(), reason="Server not running")
     def test_ideate_command(self):
         """Ideate command should work."""
         result = subprocess.run(
