@@ -9,9 +9,11 @@ import * as http from 'http';
 import * as path from 'path';
 import * as os from 'os';
 import { URL } from 'url';
-import {
+import type {
   TaskDelegateRequest,
   TaskResultRequest,
+} from './types';
+import {
   PROTOCOL_VERSION,
   ErrorCode,
 } from './types';
