@@ -58,17 +58,17 @@ export interface TaskContext {
 }
 
 /** Request to delegate a task */
-export interface TaskDelegateRequest {
+export type TaskDelegateRequest = {
   task_id?: string;
   title: string;
   description: string;
   context?: TaskContext;
   timeout_seconds?: number;
   priority?: Priority;
-}
+};
 
 /** Result of a completed task */
-export interface TaskResultRequest {
+export type TaskResultRequest = {
   task_id: string;
   status: 'success' | 'partial' | 'failed' | 'blocked';
   summary: string;
@@ -76,7 +76,7 @@ export interface TaskResultRequest {
   errors?: string[];
   checkpoint_hash?: string;
   duration_seconds?: number;
-}
+};
 
 /** Artifact created by a task */
 export interface TaskArtifact {

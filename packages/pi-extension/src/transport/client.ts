@@ -9,9 +9,6 @@ import { URL } from 'url';
 import {
   ApiResponse,
   ErrorCode,
-  TaskDelegateRequest,
-  TaskResultRequest,
-  JsonRpcRequest,
 } from '../types';
 
 /**
