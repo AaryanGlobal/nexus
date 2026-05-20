@@ -257,7 +257,7 @@ class AgentCLI:
         try:
             result = self.executor.execute("echo health_check")
             checks.append(("Executor Functional", result.success))
-        except:
+        except Exception:
             checks.append(("Executor Functional", False))
         
         # Check persistence

@@ -244,7 +244,7 @@ class WorkScanner:
             stat = os.stat(file_path)
             age_seconds = time.time() - stat.st_mtime
             return int(age_seconds / 86400)
-        except:
+        except Exception:
             return 0
     
     def _determine_priority(self, description: str) -> str:

@@ -2,7 +2,7 @@
 Graceful Degradation - Component failure handling
 Ensures system continues even when components fail
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Callable, Any, Optional
 from enum import Enum

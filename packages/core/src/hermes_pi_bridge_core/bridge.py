@@ -419,7 +419,7 @@ class AgentBridge:
                 conn.status = "connected"
                 conn.last_contact = datetime.now()
                 return True
-        except:
+        except Exception:
             conn.status = "disconnected"
             return False
     

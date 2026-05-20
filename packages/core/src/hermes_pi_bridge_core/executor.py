@@ -134,7 +134,7 @@ class SafeExecutor:
             finally:
                 try:
                     os.unlink(temp_path)
-                except:
+                except Exception:
                     pass
         else:
             return ExecutionResult(

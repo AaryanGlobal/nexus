@@ -240,7 +240,7 @@ class BridgeGovernance:
                 test_result['phase'] = 'green'
                 test_result['passed'] = True
                 break
-            except:
+            except Exception:
                 if attempt == max_retries - 1:
                     test_result['phase'] = 'failed'
         

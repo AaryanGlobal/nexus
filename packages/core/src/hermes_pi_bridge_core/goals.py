@@ -97,7 +97,7 @@ class GoalManager:
             with open(path) as f:
                 data = json.load(f)
                 self.goals = [Goal(**g) for g in data.get('goals', [])]
-        except:
+        except Exception:
             pass
     
     def _save_goals(self) -> bool:
@@ -108,7 +108,7 @@ class GoalManager:
             with open(path, 'w') as f:
                 json.dump({'goals': [g.__dict__ for g in self.goals]}, f)
             return True
-        except:
+        except Exception:
             return False
     
     def add_goal(self, title: str, description: str, priority: GoalPriority = GoalPriority.MEDIUM) -> Goal:
