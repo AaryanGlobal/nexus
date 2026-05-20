@@ -9,10 +9,10 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Callable
 
-from .loop import NHILLoop, LoopConfig, LoopState
+from .loop import NHILLoop, LoopConfig
 from .learning import PatternLearner
 from .persistence import PersistenceManager, PersistedState
 from .reasoner import TaskReasoner
