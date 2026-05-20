@@ -273,7 +273,7 @@ class SecurityControls:
                 violation = SecurityViolation(
                     event=SecurityEvent.TOOL_INJECTION_ATTEMPT,
                     threat_level=ThreatLevel.HIGH,
-                    description=f"Tool injection pattern detected",
+                    description="Tool injection pattern detected",
                     source_ip=source_ip,
                     session_id=session_id,
                     blocked=True,

@@ -286,9 +286,9 @@ class BridgeGovernance:
         elif confidence == DecisionConfidence.MEDIUM:
             return f"Proceed with caution - {decision_type.value}"
         elif confidence == DecisionConfidence.HIGH:
-            return f"High confidence based on history"
+            return "High confidence based on history"
         else:
-            return f"Certain - validated multiple times"
+            return "Certain - validated multiple times"
     
     def _record_outcome(self, decision: Decision, success: bool):
         """Record the outcome of a decision."""
