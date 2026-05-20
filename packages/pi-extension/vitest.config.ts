@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   test: {
     testTimeout: 30000,
+    globals: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],

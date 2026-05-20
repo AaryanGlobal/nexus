@@ -386,6 +386,3 @@ export default async function piExtension(pi: ExtensionAPI): Promise<void> {
 
   _log('Extension loaded');
 }
-
-module.exports = { HermesBridge, piExtension };
-module.exports.default = piExtension;
