@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Hermes Bridge Server
+  hermes-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: hermes
+    ports:
+      - "8080:8080"
+    environment:
+      - HERMES_PI_BRIDGE_AUTH_TOKEN=dev-token
+      - HERMES_PI_BRIDGE_PI_URL=http://pi-bridge:2719
+      - HERMES_PI_BRIDGE_MAX_CONCURRENT=2
+    volumes:
+      - ./packages/hermes-plugin:/app/packages/hermes-plugin
+    depends_on:
+      - pi-bridge
+    networks:
+      - bridge-net
+
+  # pi Bridge Server
+  pi-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: pi
+    ports:
+      - "2719:2719"
+    environment:
+      - HERMES_BRIDGE_AUTH_TOKEN=dev-token
+      - HERMES_BRIDGE_HERMES_URL=http://hermes-bridge:8080
+    volumes:
+      - ./packages/pi-extension:/app/packages/pi-extension
+    networks:
+      - bridge-net
+
+  # Integration test runner
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    environment:
+      - HERMES_PI_BRIDGE_AUTH_TOKEN=dev-token
+      - HERMES_BRIDGE_AUTH_TOKEN=dev-token
+    depends_on:
+      - hermes-bridge
+      - pi-bridge
+    networks:
+      - bridge-net
+
+networks:
+  bridge-net:
+    driver: bridge

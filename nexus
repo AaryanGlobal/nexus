@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+"""
+Nexus - PI-Hermes Agent Bridge CLI
+Usage: nexus [command]
+
+Commands:
+  status         - Show system status
+  connect        - Connect to agents  
+  capabilities   - List agent capabilities
+  pillars        - List life pillars
+  goals          - List goals
+  health         - Check agent health
+  sync           - Sync context with agents
+  start          - Start Nexus server
+  stop           - Stop Nexus server
+  help           - Show this help
+
+Run 'nexus help' for more details.
+"""
+import sys
+import os
+
+# Ensure nexus package path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+if __name__ == "__main__":
+    from nexus_cli import main
+    main()

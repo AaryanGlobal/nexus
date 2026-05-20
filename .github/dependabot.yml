@@ -1,0 +1,66 @@
+# Dependabot configuration for hermes-pi-bridge
+# https://docs.github.com/en/code-security/dependabot
+
+version: 2
+updates:
+  # Enable GitHub Actions version updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Python dependencies (core package)
+  - package-ecosystem: "pip"
+    directory: "/packages/core"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "python"
+
+  # Python dependencies (hermes-plugin)
+  - package-ecosystem: "pip"
+    directory: "/packages/hermes-plugin"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "python"
+
+  # Node.js dependencies (pi-extension)
+  - package-ecosystem: "npm"
+    directory: "/packages/pi-extension"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "javascript"
+
+# Enable automatic PR merging for minor/patch updates
+automerges:
+  - match:
+      dependency-type: "development"
+      update-type: "semver-patch"
+  - match:
+      dependency-type: "production"
+      update-type: "semver-patch"

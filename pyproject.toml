@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexus-agents"
+version = "1.0.0"
+description = "PI-Hermes Agent Integration System"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Nexus Authors"}]
+keywords = ["agent", "ai", "hermes", "pi", "bridge"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.pytest.ini_options]
+testpaths = ["integration", "packages/*/tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

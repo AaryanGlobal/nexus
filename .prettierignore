@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+packages/pi-extension/node_modules/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Generated files
+*.pyc
+*.pyo
+__pycache__/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Lock files (don't format these)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Minified files
+*.min.js
+*.min.css
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Markdown (optional - uncomment if you want to format MD)
+# *.md

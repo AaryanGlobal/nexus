@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexus-pi-extension"
+version = "1.0.0"
+description = "PI integration extension for Nexus"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+dependencies = [
+    "hermes-pi-bridge-core @ file:///${PROJECT_ROOT}/packages/core",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

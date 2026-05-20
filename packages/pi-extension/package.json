@@ -1,0 +1,42 @@
+{
+  "name": "hermes-pi-bridge",
+  "version": "1.0.0",
+  "description": "Connect your pi and Hermes agents. Delegate tasks between them automatically.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "@vitest/coverage-v8": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pi": ">=0.75.0"
+  },
+  "keywords": [
+    "hermes-agent",
+    "pi-agent",
+    "ai-agents",
+    "agent-bridge",
+    "task-delegation",
+    "autonomous-agents",
+    "ai-tooling"
+  ],
+  "license": "MIT",
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ]
+}

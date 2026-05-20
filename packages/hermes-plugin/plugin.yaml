@@ -1,0 +1,16 @@
+name: hermes-pi-bridge
+version: 1.0.0
+description: "Bidirectional bridge between Hermes and pi agents"
+author: Hermes-Pi Bridge Authors
+kind: standalone
+platforms:
+  - linux
+  - macos
+provides_tools:
+  - pi_delegate
+  - pi_status
+  - pi_result
+  - pi_config
+hooks:
+  - on_session_end
+  - on_session_start

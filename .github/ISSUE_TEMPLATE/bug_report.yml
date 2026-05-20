@@ -1,0 +1,79 @@
+name: Bug Report
+description: Something broken? Let us know and we'll fix it.
+title: "[Bug] "
+labels: ["bug"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Something Not Working?
+
+        We want to fix it. The more detail you give, the faster we can help.
+
+  - type: input
+    id: version
+    attributes:
+      label: Bridge Version
+      description: "Which version are you running?"
+      placeholder: "e.g., 1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: agents
+    attributes:
+      label: Agent Versions
+      description: "What versions of Hermes and pi?"
+      placeholder: "e.g., Hermes 0.14.0, pi 0.75.2"
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Where's the problem?
+      options:
+        - Hermes plugin (pi_delegate, pi_status, pi_result)
+        - pi extension (hermes_delegate, hermes_report_result)
+        - Bridge server (HTTP API)
+        - Installation / setup
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Be specific about what you tried to do.
+      placeholder: |
+        I ran /pi_delegate and expected it to delegate to pi...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should have happened?
+      description: What did you expect to see?
+      placeholder: |
+        Task should be delegated and results returned...
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: Paste any error messages or relevant log lines
+      placeholder: |
+        ```
+        [Paste error here]
+        ```
+
+  - type: checkboxes
+    id: context
+    attributes:
+      label: Context
+      options:
+        - label: I've checked /pi_status and pi shows as available
+        - label: I've verified both bridge servers are running
+        - label: I've tried restarting both agents

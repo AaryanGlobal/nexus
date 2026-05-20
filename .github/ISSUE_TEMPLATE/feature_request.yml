@@ -1,0 +1,84 @@
+name: Feature Request
+description: Suggest a new feature or improvement
+title: "[Feature] "
+labels: ["enhancement"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Request
+
+        Thanks for your feature request! Please fill out as much as possible.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which component should this feature target?
+      options:
+        - Core (shared types/protocol)
+        - Hermes Plugin
+        - pi Extension
+        - Bridge Server
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: |
+        Describe the problem you're trying to solve.
+        Why is this important?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How should this feature work?
+      placeholder: |
+        Describe your proposed solution.
+        What should happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What alternatives have you considered?
+      placeholder: |
+        Describe alternative approaches you've considered.
+
+  - type: textarea
+    id: usage
+    attributes:
+      label: Example Use Case
+      description: Show an example of how this feature would be used
+      placeholder: |
+        ```python
+        # Example usage
+        ```
+
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility
+      description: Are there any compatibility concerns?
+      placeholder: |
+        - Breaking changes: Yes/No
+        - Required changes to existing code: ...
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      options:
+        - label: I agree to follow the [Code of Conduct](./CODE_OF_CONDUCT.md)
+          required: true
