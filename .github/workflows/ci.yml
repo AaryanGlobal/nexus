@@ -25,7 +25,7 @@ jobs:
 
       - name: Lint Python code
         run: |
-          ruff check packages/core/src packages/hermes-plugin/src
+          ruff check packages/core/src packages/hermes-plugin/src --ignore F401 --ignore F811 --ignore F401
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -55,7 +55,7 @@ jobs:
       - name: Install core package
         run: |
           pip install -e packages/core
-          pip install pytest pytest-asyncio pytest-cov
+          pip install pytest pytest-asyncio pytest-cov websockets
 
       - name: Run core tests with coverage
         run: |

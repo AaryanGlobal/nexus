@@ -80,19 +80,13 @@ class TestLifeContextAutoInit:
 class TestNexusServerIntegration:
     """Test Nexus server properly integrates bridge and life context."""
     
-    def test_nexus_status_endpoint_returns_full_info(self):
-        """Nexus /status should return connected bridges and life context."""
-        from nexus_server import NexusAPIHandler
-        from unittest.mock import MagicMock
-        import io
-        import sys
-        
-        # We can't easily test the HTTP handler directly,
-        # but we can test the components it uses
+    def test_nexus_status_endpoint_returns_full_info(self, temp_storage):
+        """Nexus bridge and life context should integrate properly."""
+        # Test the components without needing nexus_server
         bridge = get_bridge()
-        engine = LifeContextEngine()
+        engine = LifeContextEngine(storage_path=str(temp_storage))
         
-        # Manual check that status structure is correct
+        # Verify status structures exist
         bridge_status = bridge.get_connection_status()
         life_status = engine.get_status()
         
